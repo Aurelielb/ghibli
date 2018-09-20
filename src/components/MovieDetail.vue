@@ -7,8 +7,12 @@
       <p>Producer: {{movie.producer}}</p>
       <p>Release date: {{movie.release_date}}</p>
       <p>Rt score: {{movie.rt_score}}</p>
-      <h3>People</h3>
-      <p>{{movie.people}}</p>
+      <h3 class="mb-3">People</h3>
+      <ul class="list-inline">
+        <li class="list-inline-item"
+          v-for="people in movie.people" :key="people"
+          v-if="getCharacter(people)">{{getCharacter(people).name}}</li>
+      </ul>
       <h3>Species</h3>
       <p>{{movie.species}}</p>
       <h3>Locations</h3>
@@ -26,6 +30,15 @@ export default {
     movie () {
       const movies = this.$store.getters.getMovieById(this.$route.params.id)
       return movies.length ? movies[0] : {}
+    }
+  },
+  methods: {
+    getCharacter: function (url) {
+      let person = this.$store.getters.getCharacterById(this.getId(url))
+      return person[0]
+    },
+    getId: (url) => {
+      return url.substr(url.lastIndexOf('/') + 1)
     }
   },
   created () {

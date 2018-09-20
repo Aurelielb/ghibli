@@ -4,9 +4,15 @@
     <ul class="row list-unstyled">
       <li class="col-3"
         v-for="movie in movieList" :key="movie.id">
-        <h3>{{movie.title}}</h3>
-        <p>{{movie.description | excerpt}}</p>
-        <router-link :to="getMovieDetailLink(movie.id)">View more</router-link>
+        <div class="card mb-3">
+          <img class="card-img-top" src="/static/images/ghibli.jpg" alt="Ghibli">
+          <div class="card-body">
+          <h3 class="card-title">{{movie.title}}</h3>
+          <p class="card-text">{{movie.description | excerpt}}</p>
+          <router-link class="card-link"
+            :to="getMovieDetailLink(movie.id)">View more</router-link>
+          </div>
+        </div>
       </li>
     </ul>
   </div>
