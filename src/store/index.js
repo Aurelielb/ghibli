@@ -15,64 +15,152 @@ const getOptions = () => {
 export default new Vuex.Store({
   state: {
     baseURL: 'https://ghibliapi.herokuapp.com',
-    characterList: [],
-    movieList: []
+    peopleList: [],
+    movieList: [],
+    speciesList: [],
+    locationsList: [],
+    vehiclesList: []
   },
   getters: {
     getMovieById: state => id => {
+      if (!id) {
+        return []
+      }
       let movies = state.movieList.filter(movie => {
         return movie.id === id
       })
       return movies
     },
     getCharacterById: state => id => {
-      let movies = state.characterList.filter(movie => {
-        return movie.id === id
+      if (!id) {
+        return []
+      }
+      let people = state.peopleList.filter(character => {
+        return character.id === id
       })
-      return movies
+      return people
+    },
+    getSpeciesById: state => id => {
+      if (!id) {
+        return []
+      }
+      let species = state.speciesList.filter(species => {
+        return species.id === id
+      })
+      return species
+    },
+    getLocationById: state => id => {
+      if (!id) {
+        return []
+      }
+      let locations = state.locationsList.filter(location => {
+        return location.id === id
+      })
+      return locations
+    },
+    getVehicleById: state => id => {
+      if (!id) {
+        return []
+      }
+      let vehicles = state.vehiclesList.filter(vehicle => {
+        return vehicle.id === id
+      })
+      return vehicles
+    },
+    getAssetsByTypes: (state, getters) => (type, id) => {
+      let datas, listName
+      switch (type) {
+        case 'films':
+          datas = getters.getMovieById(id)
+          listName = 'movieList'
+          break
+        case 'people':
+          datas = getters.getCharacterById(id)
+          listName = 'peopleList'
+          break
+        case 'locations':
+          datas = getters.getLocationById(id)
+          listName = 'locationsList'
+          break
+        case 'vehicles':
+          datas = getters.getVehicleById(id)
+          listName = 'vehiclesList'
+          break
+      }
+      return { datas, listName }
     }
   },
   actions: {
-    fetchAllMovies: ({state}) => {
+    fetchAllMovies: ({ state, dispatch }) => {
+      dispatch('fetchAllByType', { type: 'films', list: 'movieList' })
+    },
+    fetchAllPeople: ({ state, dispatch }) => {
+      dispatch('fetchAllByType', { type: 'people', list: 'peopleList' })
+    },
+    fetchAllLocations: ({ state, dispatch }) => {
+      dispatch('fetchAllByType', { type: 'locations', list: 'locationsList' })
+    },
+    fetchAllVehicles: ({ state, dispatch }) => {
+      dispatch('fetchAllByType', { type: 'vehicles', list: 'vehiclesList' })
+    },
+    fetchAllByType: ({ state }, {type, list}) => {
       const options = getOptions()
-      fetch(state.baseURL + '/films', options)
+      fetch(`${state.baseURL}/${type}`, options)
         .then(data => data.json())
         .then(json => {
-          state.movieList = json
+          state[list] = json
         })
         .catch(error => console.log(error))
     },
-    fetchMovie: ({ state, getters, dispatch }, { id }) => {
-      let movies = getters.getMovieById(id)
-      if (movies.length === 0) {
+    fetchData: ({ state, getters, dispatch }, { id, type }) => {
+      let { datas, listName } = getters.getAssetsByTypes(type, id)
+      if (datas.length > 0) {
+        dispatch('getResources', { item: datas[0] })
+      } else {
         const options = getOptions()
-        fetch(state.baseURL + '/films/' + id, options)
+        fetch(`${state.baseURL}/${type}/${id}`, options)
           .then(data => data.json())
           .then(json => {
-            state.movieList.push(json)
-            dispatch('fetchMovieResources', { movie: json })
+            state[listName].push(json)
+            dispatch('getResources', { item: json })
           })
           .catch(error => console.log(error))
-      } else {
-        dispatch('fetchMovieResources', { movie: movies[0] })
       }
     },
-    fetchMovieResources: ({ state, getters }, { movie }) => {
-      for (let char of movie.people) {
-        let id = char.substr(char.lastIndexOf('/') + 1)
-        let character = getters.getCharacterById(id)
-        if (character.length === 0) {
-          let url = state.baseURL + '/people/' + encodeURI(id)
+    getResources: ({ dispatch, getters }, { item }) => {
+      if (!item) {
+        return
+      }
+      dispatch('fetchResources', { datas: item.films, field: 'movie', getter: getters.getMovieById })
+      dispatch('fetchResources', { datas: item.people, field: 'people', getter: getters.getCharacterById })
+      dispatch('fetchResources', { datas: item.pilot, field: 'people', getter: getters.getCharacterById })
+      dispatch('fetchResources', { datas: item.residents, field: 'people', getter: getters.getCharacterById })
+      dispatch('fetchResources', { datas: item.species, field: 'species', getter: getters.getSpeciesById })
+      dispatch('fetchResources', { datas: item.locations, field: 'locations', getter: getters.getLocationById })
+      dispatch('fetchResources', { datas: item.vehicles, field: 'vehicles', getter: getters.getVehicleById })
+    },
+    fetchResources: ({ state }, { datas, field, getter }) => {
+      if (typeof datas === 'string') {
+        datas = [datas]
+      } else if (typeof datas !== 'object') {
+        return
+      }
+
+      for (let url of datas) {
+        let id = url.substr(url.lastIndexOf('/') + 1)
+        if (id === '') return
+
+        let member = getter(id)
+        if (member.length === 0) {
           const options = getOptions()
           fetch(url, options)
             .then(data => data.json())
             .then(json => {
-              state.characterList.push(json)
+              state[`${field}List`].push(json)
             })
             .catch(error => console.log(error))
         }
       }
     }
-
   }
 })
