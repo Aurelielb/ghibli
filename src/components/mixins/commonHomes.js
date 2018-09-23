@@ -7,8 +7,10 @@ export default {
   methods: {
     setOrder: function () {
       if (this.order === null || this.order < 0) {
+        // sort ascending
         this.order = 1
       } else {
+        // sort descending
         this.order = -1
       }
     },

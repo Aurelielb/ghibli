@@ -45,7 +45,7 @@ export default {
       if (typeof vehicleId !== 'string') {
         return false
       }
-      return this.$router.push(this.getVehiclesDetailLink(vehicleId))
+      this.$router.push(this.getVehiclesDetailLink(vehicleId))
     }
   },
   created () {

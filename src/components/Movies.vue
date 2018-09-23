@@ -51,28 +51,7 @@ export default {
       if (typeof movieId !== 'string') {
         return false
       }
-      return this.$router.push(this.getMovieDetailLink(movieId))
-    },
-    setOrder: function () {
-      if (this.order === null || this.order < 0) {
-        this.order = 1
-      } else {
-        this.order = -1
-      }
-    },
-    sortedList: function () {
-      let movieList = [...this.$store.state.movieList]
-      return movieList.sort((a, b) => {
-        let titleA = a.title.toLowerCase()
-        let titleB = b.title.toLowerCase()
-        if (titleA > titleB) {
-          return 1 * this.order
-        }
-        if (titleA < titleB) {
-          return -1 * this.order
-        }
-        return 0
-      })
+      this.$router.push(this.getMovieDetailLink(movieId))
     }
   },
   created () {

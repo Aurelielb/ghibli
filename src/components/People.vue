@@ -45,7 +45,7 @@ export default {
       if (typeof personId !== 'string') {
         return false
       }
-      return this.$router.push(this.getPeopleDetailLink(personId))
+      this.$router.push(this.getPeopleDetailLink(personId))
     }
   },
   created () {
@@ -53,6 +53,3 @@ export default {
   }
 }
 </script>
-
-<style>
-</style>

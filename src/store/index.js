@@ -86,6 +86,9 @@ export default new Vuex.Store({
           datas = getters.getVehicleById(id)
           listName = 'vehiclesList'
           break
+        default:
+          console.log('assets not implemented:' + type)
+          break
       }
       return { datas, listName }
     }

@@ -45,7 +45,7 @@ export default {
       if (typeof locationId !== 'string') {
         return false
       }
-      return this.$router.push(this.getLocationDetailLink(locationId))
+      this.$router.push(this.getLocationDetailLink(locationId))
     }
   },
   created () {
@@ -53,6 +53,3 @@ export default {
   }
 }
 </script>
-
-<style>
-</style>
